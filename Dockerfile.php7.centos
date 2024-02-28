@@ -1,0 +1,78 @@
+# Taking CentOs7 operating system as base image
+FROM centos:7
+
+# About 
+LABEL Author="Ghulam Moinuddin"
+LABEL Email="ghulam.moinuddin@indusnet.co.in"
+LABEL Description="Docker container configuration for PHP dev environment on top of CentOs7 along with other development dependencies"
+LABEL Organisation="CASHPOINT Solutions GmbH"
+
+# Timezone Setting 
+# Change it as per your country or city like Europe/Vienna
+# List Of IANA timezone => https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+ENV TZ=Asia/Kolkata
+
+# Installing apache
+RUN yum update -y
+RUN yum -y install httpd httpd-tools
+
+# Add EPEL and REMI Repository (https://computingforgeeks.com/how-to-install-php-7-4-on-centos-7/)
+RUN yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+RUN yum install -y https://rpms.remirepo.net/enterprise/remi-release-7.rpm
+
+# Installing PHP 8.0 on CentOS 7
+RUN yum -y install yum-utils
+RUN yum-config-manager --enable remi-php74
+RUN yum install php php-cli -y
+
+# CPCMSv2 PHP dependencies / extensions
+RUN yum install -y \
+    php-mbstring \
+    php-mysqli \
+    php-pdo_mysql \
+    php-sqlite3 \
+    php-pdo_sqlite \
+    php-gd \
+    php-ldap \
+    php-xdebug \
+    php-dom \
+    php-xmlwriter \
+    gcc \
+    openssl-devel \
+    php-devel \
+    php-cli \
+    php-pear \
+    php-intl
+
+# RUN pecl install mongodb 
+
+# Permissions & path for log files
+ENV APACHE_RUN_USER www-data
+ENV APACHE_RUN_GROUP www-data
+ENV APACHE_LOG_DIR /var/log/httpd
+
+# Installing Composer
+RUN php -r "readfile('http://getcomposer.org/installer');" | php -- --install-dir=/usr/local/bin/ --filename=composer
+
+RUN yum install epel-release -y
+RUN yum install nodejs -y
+RUN yum install npm -y
+
+# Installing phpMayAdmin
+RUN yum -y install phpmyadmin
+COPY ./helpers/phpMyAdmin.conf /etc/httpd/conf.d
+COPY ./helpers/config.inc.php /etc/phpMyAdmin
+RUN chmod 755 /etc/phpMyAdmin/config.inc.php
+
+# Setting Timezone
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+# Installing phpunit
+COPY ./helpers/phpunit-9.5.10.phar /usr/local/bin/phpunit
+RUN chmod +x /usr/local/bin/phpunit
+
+# Setting Apache Webroot directory as home
+WORKDIR /var/www/html
+
+# Starting Apache Server
+CMD ["/usr/sbin/httpd","-D","FOREGROUND"]

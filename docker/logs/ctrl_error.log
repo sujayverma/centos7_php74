@@ -1,0 +1,1 @@
+[Tue Jan 30 16:38:51.192604 2024] [php:error] [pid 2459] [client 172.18.0.1:36008] PHP Fatal error:  Cannot declare class App\\Http\\Controllers\\SubCompaniesController, because the name is already in use in /var/www/html/ctrlm_master/Modules/Admin/app/Http/Controllers/SubCompaniesController.php on line 7, referer: http://localhost:8081/admin/masterData/companies

@@ -1,0 +1,18 @@
+version: "3.7"
+services:
+  php7:
+    container_name: php7_setup
+    build:
+      context: .
+      dockerfile: ./Dockerfile.php7.centos
+    ports:
+      - 90:80
+      - 8090-8095:8090-8095
+      # - 445:443
+    volumes: 
+      - ./www:/var/www/html
+      - ./docker/httpd.conf:/etc/httpd/conf/httpd.conf
+      - ./docker/logs:/var/log/httpd
+      - ./docker/php.ini:/etc/php.ini
+    
+ 
